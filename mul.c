@@ -22,6 +22,58 @@ int is_mul(int M, int N, int A[N][M], int B[M][N], int C[N][N]);
 char mul_submit_desc[] = "Multiply submission";
 void mul_submit(int M, int N, int A[N][M], int B[M][N], int C[N][N])
 {
+    int i, j, k, kk;
+    int a, t0, t1, t2, t3, t4, t5, t6, t7;
+
+    if (M == 32 && N == 32) {
+        for (j = 0; j < N; j += 8) {
+            for (kk = 0; kk < M; kk += 8) {
+                for (i = 0; i < N; ++i) {
+                    /* Only later panels can read a partial sum from C. */
+                    if (kk == 0) {
+                        t0 = t1 = t2 = t3 = 0;
+                        t4 = t5 = t6 = t7 = 0;
+                    } else {
+                        t0 = C[i][j];
+                        t1 = C[i][j + 1];
+                        t2 = C[i][j + 2];
+                        t3 = C[i][j + 3];
+                        t4 = C[i][j + 4];
+                        t5 = C[i][j + 5];
+                        t6 = C[i][j + 6];
+                        t7 = C[i][j + 7];
+                    }
+                    for (k = kk; k < kk + 8; ++k) {
+                        a = A[i][k];
+                        t0 += a * B[k][j];
+                        t1 += a * B[k][j + 1];
+                        t2 += a * B[k][j + 2];
+                        t3 += a * B[k][j + 3];
+                        t4 += a * B[k][j + 4];
+                        t5 += a * B[k][j + 5];
+                        t6 += a * B[k][j + 6];
+                        t7 += a * B[k][j + 7];
+                    }
+                    C[i][j] = t0;
+                    C[i][j + 1] = t1;
+                    C[i][j + 2] = t2;
+                    C[i][j + 3] = t3;
+                    C[i][j + 4] = t4;
+                    C[i][j + 5] = t5;
+                    C[i][j + 6] = t6;
+                    C[i][j + 7] = t7;
+                }
+            }
+        }
+    } else {
+        for (i = 0; i < N; ++i)
+            for (j = 0; j < N; ++j) {
+                t0 = 0;
+                for (k = 0; k < M; ++k)
+                    t0 += A[i][k] * B[k][j];
+                C[i][j] = t0;
+            }
+    }
 }
 
 /*
